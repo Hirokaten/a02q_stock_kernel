@@ -1,0 +1,50 @@
+name: Build Kernel
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bc bison flex libssl-dev make \
+            libc6-dev libncurses5-dev device-tree-compiler python3 \
+            git zip ccache build-essential
+
+      - name: Clone Proton Clang toolchain
+        run: git clone --depth=1 https://github.com/kdrag0n/proton-clang clang
+
+      - name: Build kernel with Wi-Fi monitor drivers
+        run: |
+          export PATH="$PWD/clang/bin:$PATH"
+          export ARCH=arm64
+          export KBUILD_BUILD_USER=claude
+          export KBUILD_BUILD_HOST=github
+          ARGS="O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi-"
+          make $ARGS sdm450_sec_a02q_mea_mea_defconfig
+          ./scripts/config --file out/.config \
+            -e WLAN \
+            -e WLAN_VENDOR_ATH \
+            -e MAC80211 \
+            -e WCN36XX
+          make $ARGS olddefconfig
+          echo "=== config after olddefconfig ==="
+          grep -E 'CONFIG_(WLAN_VENDOR_ATH|MAC80211|WCN36XX|CFG80211)=' out/.config || echo "(symbols NOT set!)"
+          make -j"$(nproc)" $ARGS
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kernel-samsung-wcn36xx
+          path: |
+            out/arch/arm64/boot/Image*
+            out/.config
