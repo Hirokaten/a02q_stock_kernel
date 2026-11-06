@@ -17,18 +17,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y bc bison flex libssl-dev make \
             libc6-dev libncurses5-dev device-tree-compiler python3 \
-            git zip ccache build-essential
+            git zip ccache build-essential libtinfo5 lib32z1 lib32stdc++6
 
-      - name: Clone Proton Clang toolchain
-        run: git clone --depth=1 https://github.com/kdrag0n/proton-clang clang
+      - name: Clone GCC 4.9 toolchains
+        run: |
+          git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 gcc64
+          git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 gcc32
 
       - name: Build kernel with Wi-Fi monitor drivers
         run: |
-          export PATH="$PWD/clang/bin:$PATH"
+          export PATH="$PWD/gcc64/bin:$PWD/gcc32/bin:$PATH"
           export ARCH=arm64
           export KBUILD_BUILD_USER=claude
           export KBUILD_BUILD_HOST=github
-          ARGS="O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-gnu- CROSS_COMPILE_ARM32=arm-linux-gnueabi-"
+          ARGS="O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-"
           make $ARGS sdm450_sec_a02q_mea_mea_defconfig
           ./scripts/config --file out/.config \
             -e WLAN \
