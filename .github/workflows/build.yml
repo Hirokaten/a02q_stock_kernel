@@ -31,6 +31,10 @@ jobs:
           export ARCH=arm64
           export KBUILD_BUILD_USER=claude
           export KBUILD_BUILD_HOST=github
+          echo '#!/usr/bin/env python' > scripts/gcc-wrapper.py
+          echo 'import sys, subprocess' >> scripts/gcc-wrapper.py
+          echo 'sys.exit(subprocess.call(sys.argv[1:]))' >> scripts/gcc-wrapper.py
+          chmod +x scripts/gcc-wrapper.py
           ARGS="O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-"
           make $ARGS sdm450_sec_a02q_mea_mea_defconfig
           ./scripts/config --file out/.config \
