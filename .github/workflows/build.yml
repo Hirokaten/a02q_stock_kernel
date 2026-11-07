@@ -35,6 +35,7 @@ jobs:
           echo 'import sys, subprocess' >> scripts/gcc-wrapper.py
           echo 'sys.exit(subprocess.call(sys.argv[1:]))' >> scripts/gcc-wrapper.py
           chmod +x scripts/gcc-wrapper.py
+          find . -type f \( -name Makefile -o -name Kbuild -o -name '*.mk' \) -exec sed -i 's/-Werror[a-zA-Z0-9=,_-]*//g' {} +
           ARGS="O=out ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- CROSS_COMPILE_ARM32=arm-linux-androideabi-"
           make $ARGS sdm450_sec_a02q_mea_mea_defconfig
           ./scripts/config --file out/.config \
