@@ -16,8 +16,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y bc bison flex libssl-dev make \
-            libc6-dev libncurses5-dev device-tree-compiler python3 \
-            git zip ccache build-essential libtinfo5 lib32z1 lib32stdc++6
+            libc6-dev libncurses5-dev device-tree-compiler \
+            git zip ccache build-essential libtinfo5 lib32z1 lib32stdc++6 python2
+          sudo ln -sf /usr/bin/python2 /usr/bin/python
 
       - name: Clone GCC 4.9 toolchains
         run: |
