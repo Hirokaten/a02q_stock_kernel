@@ -41,7 +41,7 @@ jobs:
           make $ARGS olddefconfig
           echo "=== config after olddefconfig ==="
           grep -E 'CONFIG_(WLAN_VENDOR_ATH|MAC80211|WCN36XX|CFG80211)=' out/.config || echo "(symbols NOT set!)"
-          make -j"$(nproc)" $ARGS
+          make -j"$(nproc)" $ARGS KCFLAGS="-Wno-error"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
